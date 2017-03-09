@@ -5,7 +5,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+<<<<<<< HEAD
 var mongoose = require('./libs/mongodb');
+=======
+var mongoose = require('./libs/mongoose');
+>>>>>>> c27c412206e10b15d480851ed984f72ca86eafa8
 global.dao = require('./libs/dao')(mongoose);
 
 var index = require('./routes/index');
