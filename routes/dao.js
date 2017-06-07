@@ -77,7 +77,7 @@ router.get('/list', function (req, res, next) {
     User.find({})
         .skip(pageNum * pageSize)
         .limit(pageSize)
-        .then(function (err, result) {
+        .exec(function (err, result) {
             if (err) {
                 console.log((err))
             } else {

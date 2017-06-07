@@ -6,10 +6,11 @@ var config = require('../libs/config')
 var mongoose = require('mongoose');
 var bluebird = require('bluebird')
 mongoose.Promise = bluebird;
+
 var url = "mongodb://" + config.dbUser + ":" + config.dbPassword + "@" + config.dbUrl + ":" + config.dbPort + "/" + config.dbName;
 console.log(url);
 
-mongoose.connect(url);
+mongoose.connect(url, config.options);
 
 mongoose.connection.once('open', function () {
     console.log("The mongoLab is opened.")
