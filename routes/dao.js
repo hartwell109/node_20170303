@@ -77,12 +77,12 @@ router.get('/list', function (req, res, next) {
     User.find({})
         .skip(pageNum * pageSize)
         .limit(pageSize)
-        .exec(function (err, result) {
+        .then(function (result, err) {
             if (err) {
-                console.log((err))
+                console.log(err)
             } else {
                 console.log(result);
-                res.json(result)
+                res.jsonp(result)
             }
         })
 });
