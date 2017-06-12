@@ -2,7 +2,7 @@
  * Created by Mars on 2017/3/8.
  */
 'use strict';
-var config = require('../libs/config');
+var config = require('.//config');
 var mongoose = require('mongoose');
 var bluebird = require('bluebird');
 var log = require('winston');

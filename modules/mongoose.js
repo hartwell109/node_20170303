@@ -2,7 +2,7 @@
  * Created by Mars on 2017/3/8.
  */
 var logger = require('winston')
-var config = require('../libs/config')
+var config = require('.//config')
 var mongoose = require('mongoose');
 var bluebird = require('bluebird')
 mongoose.Promise = bluebird;
