@@ -73,8 +73,8 @@ router.get('/insert', function (req, res, next) {
 router.get('/list', function (req, res, next) {
     var User = global.dao.User;
     var pageSize = 10;
-    var pageNum = req.query.pageNum;
-    if (pageNum == '' || pageNum == null) {
+    var pageNum = req.query.pageNum - 1;
+    if (pageNum == '' || pageNum == null || pageNum < 0) {
         pageNum = 0;
     }
 
