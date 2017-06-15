@@ -4,9 +4,24 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var child_process = require('child_process');
 
-var mongoose = require('./modules/mongoose');
-global.dao = require('./modules/dao')(mongoose);
+var mongoose = require('./modules/mongodb/mongoose');
+global.dao = require('./modules/dao/dao')(mongoose);
+
+/**
+ * 加载通讯模块
+ */
+var xmpp = child_process.fork('./modules/xmpp/xmpp');
+var mqtt = child_process.fork('./modules/mqtt/mqtt');
+
+xmpp.on('message', function (msg) {
+    console.log(msg);
+})
+
+mqtt.on('message', function (msg) {
+    console.log(msg)
+})
 
 var index = require('./routes/index');
 var users = require('./routes/users');

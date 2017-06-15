@@ -2,15 +2,15 @@
  * Created by Mars on 2017/3/8.
  */
 var logger = require('winston')
-var config = require('.//config')
+var config = require('../config')
 var mongoose = require('mongoose');
 var bluebird = require('bluebird')
 mongoose.Promise = bluebird;
 
-var url = "mongodb://" + config.dbUser + ":" + config.dbPassword + "@" + config.dbUrl + ":" + config.dbPort + "/" + config.dbName;
+var url = "mongodb://" + config.mongodb.dbUser + ":" + config.mongodb.dbPassword + "@" + config.mongodb.dbUrl + ":" + config.mongodb.dbPort + "/" + config.mongodb.dbName;
 console.log(url);
 
-mongoose.connect(url, config.options);
+mongoose.connect(url, config.mongodb.options);
 
 mongoose.connection.once('open', function () {
     console.log("The mongoLab is opened.")
