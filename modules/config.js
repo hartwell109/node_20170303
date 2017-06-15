@@ -26,6 +26,9 @@ var config = {
     mqtt: {
         url: 'mqtt://test.mosquitto.org',
         topic: 'topic'
+    },
+    socketio: {
+        port: 3333
     }
 }
 module.exports = config

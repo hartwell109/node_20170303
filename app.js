@@ -14,12 +14,17 @@ global.dao = require('./modules/dao/dao')(mongoose);
  */
 var xmpp = child_process.fork('./modules/xmpp/xmpp');
 var mqtt = child_process.fork('./modules/mqtt/mqtt');
+var socketio = child_process.fork('./modules/socketio/socketio');
 
 xmpp.on('message', function (msg) {
     console.log(msg);
 })
 
 mqtt.on('message', function (msg) {
+    console.log(msg)
+})
+
+socketio.on('message', function (msg) {
     console.log(msg)
 })
 
