@@ -4,17 +4,55 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var child_process = require('child_process');
 
+/**
+ * 加载用户认证及权限管理
+ */
+var passPort = require('passport')
+var LocalStrategy = require('passport-local').Strategy
+const user = {
+    username: 'test-user',
+    password: 'test-password',
+    id: 1
+}
+passport.use(new LocalStrategy(
+    function (username, password, done) {
+        findUser(username, function (err, user) {
+            if (err) {
+                return done(err)
+            }
+            if (!user) {
+                return done(null, false)
+            }
+            if (password !== user.password) {
+                return done(null, false)
+            }
+            return done(null, user)
+        })
+    }
+))
+
+var session = require('express-session')
+var RedisStore = require('connect-redis')(session)
+
+/**
+ * 加载config配置
+ */
+var config = require('./modules/config')
+
+/**
+ * 加载数据库模块
+ */
 var mongoose = require('./modules/mongodb/mongoose');
 global.dao = require('./modules/dao/dao')(mongoose);
 
 /**
  * 加载通讯模块
  */
-var xmpp = child_process.fork('./modules/xmpp/xmpp');
-var mqtt = child_process.fork('./modules/mqtt/mqtt');
-var socketio = child_process.fork('./modules/socketio/socketio');
+var childProcess = require('child_process');
+var xmpp = childProcess.fork('./modules/xmpp/xmpp');
+var mqtt = childProcess.fork('./modules/mqtt/mqtt');
+var socketio = childProcess.fork('./modules/socketio/socketio');
 
 xmpp.on('message', function (msg) {
     console.log(msg);
@@ -43,8 +81,31 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-app.use(cookieParser());
+//app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+/**
+ * 加载cookie设置
+ */
+app.use(cookieParser(config.redisStore.secret))
+
+/**
+ * 加载认证与权限管理
+ */
+app.use(session({
+    store: new RedisStore({
+        host: config.redisStore.host,
+        port: config.redisStore.port,
+        ttl: config.redisStore.ttl
+    }),
+    cookie: {},
+    secret: config.redisStore.secret,
+    resave: config.redisStore.resave,
+    saveUninitialized: config.redisStore.saveUninitialized
+}))
+app.use(passPort.initialize())
+app.use(passPort.session())
+
 
 app.use('/', index);
 app.use('/users', users);

@@ -3,6 +3,14 @@
  * mongodb://<dbuser>:<dbpassword>@ds021989.mlab.com:21989/mongodb_test_20160324
  */
 var config = {
+    redisStore: {
+        host: '192.168.16.220',
+        port: 6379,
+        ttl: 1800,
+        secret: 'lin.peng@union.com.cn',
+        resave: false,
+        saveUninitialized: false
+    },
     mongodb: {
         dbUser: 'root',
         dbPassword: 'admin',
