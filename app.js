@@ -1,44 +1,18 @@
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-
-/**
- * 加载用户认证及权限管理
- */
-var passPort = require('passport')
-var LocalStrategy = require('passport-local').Strategy
-const user = {
-    username: 'test-user',
-    password: 'test-password',
-    id: 1
-}
-passport.use(new LocalStrategy(
-    function (username, password, done) {
-        findUser(username, function (err, user) {
-            if (err) {
-                return done(err)
-            }
-            if (!user) {
-                return done(null, false)
-            }
-            if (password !== user.password) {
-                return done(null, false)
-            }
-            return done(null, user)
-        })
-    }
-))
-
-var session = require('express-session')
-var RedisStore = require('connect-redis')(session)
+var app = express();
 
 /**
  * 加载config配置
  */
 var config = require('./modules/config')
+
+/**
+ * 加载日志处理
+ */
+var logger = require('morgan');
+app.use(logger('dev'));
+global.logger = logger
 
 /**
  * 加载数据库模块
@@ -53,45 +27,46 @@ var childProcess = require('child_process');
 var xmpp = childProcess.fork('./modules/xmpp/xmpp');
 var mqtt = childProcess.fork('./modules/mqtt/mqtt');
 var socketio = childProcess.fork('./modules/socketio/socketio');
-
 xmpp.on('message', function (msg) {
-    console.log(msg);
+    console.log('xmpp:', msg);
 })
-
 mqtt.on('message', function (msg) {
-    console.log(msg)
+    console.log('mqtt:', msg)
 })
-
 socketio.on('message', function (msg) {
-    console.log(msg)
+    console.log('socketio:', msg)
 })
 
-var index = require('./routes/index');
-var users = require('./routes/users');
-var dao = require('./routes/dao');
+/**
+ * 加载网站标识
+ * 将favicon文件放置于/public目录下
+ */
+var favicon = require('serve-favicon');
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
-var app = express();
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+/**
+ * 配置客户端请求的body的解析
+ */
+var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-//app.use(cookieParser());
+
+/**
+ * 加载静态页面目录
+ */
 app.use(express.static(path.join(__dirname, 'public')));
 
 /**
  * 加载cookie设置
  */
+var cookieParser = require('cookie-parser');
 app.use(cookieParser(config.redisStore.secret))
 
 /**
- * 加载认证与权限管理
+ * 加载Session管理
  */
+var session = require('express-session')
+var RedisStore = require('connect-redis')(session)
 app.use(session({
     store: new RedisStore({
         host: config.redisStore.host,
@@ -103,22 +78,73 @@ app.use(session({
     resave: config.redisStore.resave,
     saveUninitialized: config.redisStore.saveUninitialized
 }))
-app.use(passPort.initialize())
-app.use(passPort.session())
 
+/*
+ 加载权限管理
+ */
+var passport = require('passport')
+var LocalStratagy = require('passport-local')
+var user = {
+    username: 'abcd',
+    password: 'abcd',
+    id: 1
+}
+passport.use('local', new LocalStratagy(
+    function (username, password, done) {
+        console.log('passport initial')
+        findUser(username, function (err, user) {
+            console.log('username:' + username)
+            if (err) {
+                return done(err)
+            }
+            if (!user) {
+                return done(null, false)
+            }
+            if (password !== user.password) {
+                return done(null, false)
+            }
+            return done(null, user)
+        })
+    }
+))
+passport.authenticationMiddleware = function () {
+    return function (req, res, next) {
+        console.log('authenticationMiddleware =' + req.isAuthenticated())
+        if (req.isAuthenticated()) {
+            return next()
+        }
+        res.redirect('/')
+    }
 
+}
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+/**
+ * 加载动态页面
+ */
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+var index = require('./routes/index');
+var users = require('./routes/users');
+var dao = require('./routes/dao');
 app.use('/', index);
 app.use('/users', users);
-app.use('/dao', dao);
+app.use('/dao', passport.authenticationMiddleware(), dao);
 
-// catch 404 and forward to error handler
+/**
+ * 加载页面未找到错误
+ */
 app.use(function (req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
 
-// error handler
+/**
+ * 加载服务器错误
+ */
 app.use(function (err, req, res, next) {
     // set locals, only providing error in development
     res.locals.message = err.message;

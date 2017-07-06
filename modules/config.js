@@ -12,10 +12,10 @@ var config = {
         saveUninitialized: false
     },
     mongodb: {
-        dbUser: 'root',
-        dbPassword: 'admin',
         dbUrl: 'ds021989.mlab.com',
         dbPort: '21989',
+        dbUser: 'root',
+        dbPassword: 'admin',
         dbName: 'mongodb_test_20160324',
         options: {
             server: {
@@ -26,10 +26,10 @@ var config = {
         }
     },
     xmpp: {
-        jid: 'node@t1.xmpp.yibeikafei.cn',
-        password: 'node',
         host: '47.93.49.110',
-        port: 5222
+        port: 5222,
+        jid: 'node@t1.xmpp.yibeikafei.cn',
+        password: 'node'
     },
     mqtt: {
         url: 'mqtt://test.mosquitto.org',
