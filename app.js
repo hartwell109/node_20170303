@@ -115,7 +115,6 @@ passport.authenticationMiddleware = function () {
         }
         res.redirect('/')
     }
-
 }
 
 app.use(passport.initialize())
