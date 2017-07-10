@@ -129,8 +129,8 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 var dao = require('./routes/dao');
 app.use('/', index);
-app.use('/users', users);
-app.use('/dao', passport.authenticationMiddleware(), dao);
+app.use('/users', passport.authenticationMiddleware(), users);
+app.use('/dao', dao);
 
 /**
  * 加载页面未找到错误
