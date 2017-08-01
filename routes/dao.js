@@ -72,13 +72,19 @@ router.get('/insert', function (req, res, next) {
 });
 router.get('/list', function (req, res, next) {
     var User = global.dao.User;
-    var pageSize = 10;
-    var pageNum = req.query.pageNum - 1;
+    var pageSize = req.query.pageSize || req.body.pageSize;
+    if (pageSize == '' || pageSize == null || pageSize < 0) {
+        pageSize = 10;
+    } else {
+        pageSize = parseInt(pageSize)
+    }
+    var pageNum = req.query.pageNum || req.body.pageNum;
     if (pageNum == '' || pageNum == null || pageNum < 0) {
         pageNum = 0;
+    } else {
+        pageNum = parseInt(pageNum)
     }
 
-    console.log("pageNum=" + pageNum);
     User.find({})
         .skip(pageNum * pageSize)
         .limit(pageSize)
