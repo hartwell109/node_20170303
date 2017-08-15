@@ -70,21 +70,24 @@ router.get('/insert', function (req, res, next) {
         }
     })
 });
-router.get('/list', function (req, res, next) {
+router.get('/list', function (req, res) {
+    var token = req.header('token')
+    console.log('token=%s', token)
+
     var User = global.dao.User;
-    var pageSize = req.query.pageSize || req.body.pageSize;
+    var pageSize = req.query.pageSize || req.body.pageSize || req.params.pageSize
     if (pageSize == '' || pageSize == null || pageSize < 0) {
         pageSize = 10;
     } else {
         pageSize = parseInt(pageSize)
     }
-    var pageNum = req.query.pageNum || req.body.pageNum;
+    var pageNum = req.query.pageNum || req.body.pageNum || req.params.pageNum
     if (pageNum == '' || pageNum == null || pageNum < 0) {
         pageNum = 0;
     } else {
         pageNum = parseInt(pageNum)
     }
-
+    console.log('pageSize = %s;pageNum = %s', pageSize, pageNum)
     User.find({})
         .skip(pageNum * pageSize)
         .limit(pageSize)
