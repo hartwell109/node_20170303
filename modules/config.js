@@ -26,10 +26,10 @@ var config = {
         }
     },
     xmpp: {
-        host: '47.93.49.110',
+        host: 'jwchat.org',
         port: 5222,
-        jid: 'node@t1.xmpp.yibeikafei.cn',
-        password: 'node'
+        jid: 'nodejs109@jwchat.org',
+        password: 'patient681020'
     },
     mqtt: {
         url: 'mqtt://test.mosquitto.org',
