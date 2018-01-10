@@ -1,8 +1,31 @@
 var printer = require("printer"),
-    util = require('util'),
-    printers = printer.getPrinters();
+    filename = process.argv[2] || __filename;
 
-printers.forEach(function(iPrinter, i){
-    console.log('' + i + 'ppd for printer "' + iPrinter.name + '":' + util.inspect(printer.getPrinterDriverOptions(iPrinter.name), {colors:true, depth:10} ));
-    console.log('\tselected page size:'+ printer.getSelectedPaperSize(iPrinter.name) + '\n');
-});
+console.log('platform:', process.platform);
+console.log('try to print file: ' + filename);
+
+if (process.platform != 'win32') {
+    printer.printFile({
+        filename: filename,
+        printer: process.env[3], // printer name, if missing then will print to default printer
+        success: function (jobID) {
+            console.log("sent to printer with ID: " + jobID);
+        },
+        error: function (err) {
+            console.log(err);
+        }
+    });
+} else {
+    // not yet implemented, use printDirect and text
+    var fs = require('fs');
+    printer.printDirect({
+        data: fs.readFileSync(filename),
+        printer: process.env[3], // printer name, if missing then will print to default printer
+        success: function (jobID) {
+            console.log("sent to printer with ID: " + jobID);
+        },
+        error: function (err) {
+            console.log(err);
+        }
+    });
+}

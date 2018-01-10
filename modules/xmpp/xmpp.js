@@ -4,6 +4,13 @@
 var config = require('../config');
 var xmpp = require('simple-xmpp');
 
+xmpp.connect({
+    jid: config.xmpp.jid,
+    password: config.xmpp.password,
+    host: config.xmpp.host,
+    port: config.xmpp.port
+});
+
 xmpp.on('online', function (data) {
     var message = 'Connected with JID ' + config.xmpp.jid;
     process.send({channel: 'xmpp', title: 'online', payload: message});
@@ -21,10 +28,6 @@ xmpp.on('close', function () {
     process.send({channel: 'xmpp', title: 'char', payload: 'connection has been closed!'});
 });
 
-xmpp.connect({
-    jid: config.xmpp.jid,
-    password: config.xmpp.password,
-    host: config.xmpp.host,
-    port: config.xmpp.port
-});
+process.on('message',function (to, message) {
 
+})
