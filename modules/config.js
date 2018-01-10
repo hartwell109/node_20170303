@@ -18,11 +18,10 @@ var config = {
         dbPassword: 'admin',
         dbName: 'mongodb_test_20160324',
         options: {
-            server: {
-                poolSize: 100,
-                auto_reconnect: true,
-                keepAlive: 10
-            }
+            poolSize: 100,
+            auto_reconnect: true,
+            keepAlive: 10,
+            reconnectTries: 100
         }
     },
     xmpp: {
@@ -33,10 +32,19 @@ var config = {
     },
     mqtt: {
         url: 'mqtt://test.mosquitto.org',
-        topic: 'topic'
+        topic: 'test.mosquitto.org'
     },
     socketio: {
         port: 3333
+    },
+    serialport: {
+        comName: "COM4",
+        options: {
+            baudRate: 9600,
+            dataBits: 8,
+            stopBits: 1,
+            parity: "none"
+        }
     }
 }
 module.exports = config

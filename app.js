@@ -1,161 +1,78 @@
 var express = require('express');
 var path = require('path');
-var app = express();
-
-/**
- * 加载config配置
- */
-var config = require('./modules/config')
-
-/**
- * 加载日志处理
- */
+var favicon = require('serve-favicon');
 var logger = require('morgan');
-app.use(logger('dev'));
-global.logger = logger
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var childProcess = require('child_process');
 
 /**
  * 加载数据库模块
  */
-var mongoose = require('./modules/mongodb/mongoose');
-global.dao = require('./modules/dao/dao')(mongoose);
+var mongoose = require('./modules/mongdb/mongoose');
+var model = require('./modules/mongdb/model')(mongoose)
+global.model = model
 
 /**
  * 加载通讯模块
  */
-var childProcess = require('child_process');
-var xmpp = childProcess.fork('./modules/xmpp/xmpp');
-var mqtt = childProcess.fork('./modules/mqtt/mqtt');
-var socketio = childProcess.fork('./modules/socketio/socketio');
-xmpp.on('message', function (msg) {
-    console.log('xmpp:', msg);
+var xmppProcess = childProcess.fork('./modules/xmpp/xmpp');
+xmppProcess.on('message', function (message) {
+    console.log(message)
 })
-mqtt.on('message', function (msg) {
-    console.log('mqtt:', msg)
+var mqttProcess = childProcess.fork('./modules/mqtt/mqtt')
+mqttProcess.on('message', function (message) {
+    console.log(message)
 })
-socketio.on('message', function (msg) {
-    console.log('socketio:', msg)
+var serialportProcess = childProcess.fork('./modules/serialport/serialport')
+serialportProcess.on('message', function (message) {
+    console.log(message)
+})
+var socketioProcess = childProcess.fork('./modules/socketio/socketio')
+socketioProcess.on('message', function (message) {
+    console.log(message)
 })
 
-/**
- * 加载网站标识
- * 将favicon文件放置于/public目录下
- */
-var favicon = require('serve-favicon');
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-
-/**
- * 配置客户端请求的body的解析
- */
-var bodyParser = require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-
-/**
- * 加载静态页面目录
- */
-app.use(express.static(path.join(__dirname, 'public')));
-
-/**
- * 加载cookie设置
- */
-var cookieParser = require('cookie-parser');
-app.use(cookieParser(config.redisStore.secret))
-
-/**
- * 加载Session管理
- */
-var session = require('express-session')
-var RedisStore = require('connect-redis')(session)
-app.use(session({
-    store: new RedisStore({
-        host: config.redisStore.host,
-        port: config.redisStore.port,
-        ttl: config.redisStore.ttl
-    }),
-    cookie: {},
-    secret: config.redisStore.secret,
-    resave: config.redisStore.resave,
-    saveUninitialized: config.redisStore.saveUninitialized
-}))
-
-/*
- 加载权限管理
- */
-var passport = require('passport')
-var LocalStratagy = require('passport-local')
-var user = {
-    username: 'abcd',
-    password: 'abcd',
-    id: 1
-}
-passport.use('local', new LocalStratagy(
-    function (username, password, done) {
-        console.log('passport initial')
-        findUser(username, function (err, user) {
-            console.log('username:' + username)
-            if (err) {
-                return done(err)
-            }
-            if (!user) {
-                return done(null, false)
-            }
-            if (password !== user.password) {
-                return done(null, false)
-            }
-            return done(null, user)
-        })
-    }
-))
-passport.authenticationMiddleware = function () {
-    return function (req, res, next) {
-        console.log('authenticationMiddleware =' + req.isAuthenticated())
-        if (req.isAuthenticated()) {
-            return next()
-        }
-        res.redirect('/')
-    }
+global.processies = {
+    xmppProcess: xmppProcess,
+    mqttProcess: mqttProcess,
+    serialportProcess: serialportProcess,
+    socketioProcess: socketioProcess
 }
 
-app.use(passport.initialize())
-app.use(passport.session())
-
 /**
- * 设置跨域访问
+ * 加载页面
  */
-app.all('*', function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*")
-    res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS")
-    res.header("Access-Control-Allow-Headers", "X-Requested-With,Content-Type,token")
-    res.header("X-Requested-With", "XMLHttpRequest")
-    res.header("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
-    next();
-})
-
-/**
- * 加载动态页面
- */
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
 var index = require('./routes/index');
 var users = require('./routes/users');
-var dao = require('./routes/dao');
-app.use('/', index);
-app.use('/users', passport.authenticationMiddleware(), users);
-app.use('/dao', dao);
+var processies = require('./routes/processies')
 
-/**
- * 加载页面未找到错误
- */
+var app = express();
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
+
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', index);
+app.use('/users', users);
+app.use('/processies', processies)
+
+// catch 404 and forward to error handler
 app.use(function (req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
 
-/**
- * 加载服务器错误
- */
+// error handler
 app.use(function (err, req, res, next) {
     // set locals, only providing error in development
     res.locals.message = err.message;

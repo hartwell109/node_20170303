@@ -1,33 +1,29 @@
 /**
- * Created by Mars on 2017/5/2.
+ * Created by Linpeng109 on 2017/5/2.
  */
 var config = require('../config');
-var xmpp = require('simple-xmpp');
+var xmppClient = require('simple-xmpp');
 
-xmpp.connect({
+xmppClient.connect({
     jid: config.xmpp.jid,
     password: config.xmpp.password,
     host: config.xmpp.host,
     port: config.xmpp.port
 });
 
-xmpp.on('online', function (data) {
+xmppClient.on('online', function (data) {
     var message = 'Connected with JID ' + config.xmpp.jid;
     process.send({channel: 'xmpp', title: 'online', payload: message});
 });
 
-xmpp.on('error', function (err) {
+xmppClient.on('error', function (err) {
     process.send({channel: 'xmpp', title: 'error', payload: err});
 });
 
-xmpp.on('chat', function (from, data) {
+xmppClient.on('chat', function (from, data) {
     process.send({channel: 'xmpp', title: 'char', payload: data});
 })
 
-xmpp.on('close', function () {
+xmppClient.on('close', function () {
     process.send({channel: 'xmpp', title: 'char', payload: 'connection has been closed!'});
 });
-
-process.on('message',function (to, message) {
-
-})
