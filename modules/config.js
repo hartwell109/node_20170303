@@ -38,7 +38,7 @@ var config = {
         port: 3333
     },
     serialport: {
-        comName: "COM4",
+        comName: "/dev/ttyUSB0",
         options: {
             baudRate: 9600,
             dataBits: 8,
