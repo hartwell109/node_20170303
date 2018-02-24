@@ -28,14 +28,17 @@ var config = {
         host: 'jwchat.org',
         port: 5222,
         jid: 'nodejs109@jwchat.org',
-        password: 'patient681020'
+        password: 'patient681020',
+        reconnectionAllowed: true
     },
     mqtt: {
         url: 'mqtt://test.mosquitto.org',
         topic: 'test.mosquitto.org'
     },
     socketio: {
-        port: 3333
+        port: 3333,
+        reconnection: true,
+        autoConnect: true
     },
     serialport: {
         comName: "/dev/ttyUSB0",

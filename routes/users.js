@@ -3,9 +3,12 @@ var router = express.Router();
 var userModel = global.model.userModel;
 var randamize = require('randomatic');
 
-/* GET users listing. */
+/**
+ *  GET users listing.
+ **/
 router.get('/', function (req, res, next) {
-    res.status(200).send("Welcome to users")
+    res.status(200).send('Welcome to user')
+    next();
 })
 
 router.get('/all', function (req, res, next) {
@@ -31,12 +34,13 @@ router.get('/count', function (req, res, next) {
 
 router.get('/save', function (req, res, next) {
     new userModel({
-        username: randamize('Aa0',8),
-        password: randamize('Aa0',8)
+        username: randamize('Aa0', 8),
+        password: randamize('Aa0', 8)
     })
         .save()
         .then(function (result) {
             console.log(result)
+            res.status(200).send(result)
         })
         .catch(function (err) {
             console.log(err)
