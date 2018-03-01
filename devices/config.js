@@ -3,7 +3,7 @@ var config = {
         dllfile: ''
     },
     crt310: {
-        com: 'com8',
+        com: 'com4',
         driver: 'CRT_310'
     }
 }
