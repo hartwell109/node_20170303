@@ -43,11 +43,12 @@ global.processies = {
 }
 
 /**
- * 加载页面
+ * 加载页面模块
  */
 var index = require('./routes/index');
 var users = require('./routes/users');
 var processies = require('./routes/processies')
+var crt310 = require('./routes/crt310')
 
 var app = express();
 
@@ -67,6 +68,7 @@ app.use(cors());
 app.use('/', index);
 app.use('/users', users);
 app.use('/processies', processies)
+app.use('/device', crt310)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

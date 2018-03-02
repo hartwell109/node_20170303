@@ -48,6 +48,9 @@ var config = {
             stopBits: 1,
             parity: "none"
         }
+    },
+    crt310: {
+        com: "COM4"
     }
 }
 module.exports = config
