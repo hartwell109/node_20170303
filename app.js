@@ -35,11 +35,21 @@ socketioProcess.on('message', function (message) {
     console.log(message)
 })
 
+/**
+ * 初始化设备驱动
+ */
+var crt310Process = childProcess.fork('./modules/device/crt310')
+
+/**
+ * 保存全局变量
+ * @type {{xmppProcess: *, mqttProcess: *, serialportProcess: *, socketioProcess: *, crt310Process: *}}
+ */
 global.processies = {
     xmppProcess: xmppProcess,
     mqttProcess: mqttProcess,
     serialportProcess: serialportProcess,
-    socketioProcess: socketioProcess
+    socketioProcess: socketioProcess,
+    crt310Process: crt310Process
 }
 
 /**
